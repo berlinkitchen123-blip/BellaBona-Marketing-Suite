@@ -110,7 +110,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight">BELLABONA<span class="text-green-500">.OS</span></h1>
-                <p class="text-xs text-slate-500">Realism Engine v6.1 (Data Merged)</p>
+                <p class="text-xs text-slate-500">Flux Text-Capable v7.0</p>
             </div>
         </div>
 
@@ -127,11 +127,11 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col relative">
         <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8">
-            <h2 class="font-semibold text-slate-700">Campaign: Bellabona Germany (Q1)</h2>
+            <h2 class="font-semibold text-slate-700">Campaign: Branded Content (Text Enabled)</h2>
             <div class="flex items-center gap-4">
                 <div
                     class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
-                    ● Data Integrated
+                    ● Typography Mode
                 </div>
             </div>
         </header>
@@ -139,24 +139,24 @@
         <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
             <div class="max-w-5xl mx-auto">
                 <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Generate Brand Asset</h3>
-                    <p class="text-slate-500">Engine now combines <strong>Bellabona.com Brand Data</strong> with
-                        <strong>Photorealism</strong>.</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Generate Branded Asset</h3>
+                    <p class="text-slate-500">Engine now prioritizes <strong>writing 'BELLABONA'</strong> on the
+                        packaging.</p>
                 </div>
 
                 <div class="card p-6 shadow-sm mb-10">
                     <div class="relative">
-                        <input type="text" id="promptUrl" class="chat-input pr-32" placeholder="e.g. Lunch meeting..."
-                            onkeydown="handleKey(event)">
+                        <input type="text" id="promptUrl" class="chat-input pr-32"
+                            placeholder="e.g. Lunch box on desk..." onkeydown="handleKey(event)">
                         <button onclick="generate()" class="absolute right-2 top-2 btn-primary flex items-center gap-2">
-                            <ion-icon name="camera"></ion-icon> Generate Data-Driven Photo
+                            <ion-icon name="text"></ion-icon> Generate with Logo
                         </button>
                     </div>
                 </div>
 
                 <div id="loading" class="hidden text-center py-12">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                    <p class="mt-4 text-slate-500 text-sm">Applying Brand Guidelines & Generating...</p>
+                    <p class="mt-4 text-slate-500 text-sm">Rendering Text & Branding...</p>
                 </div>
 
                 <div id="gallery" class="asset-grid"></div>
@@ -165,11 +165,11 @@
     </main>
 
     <script>
-        // --- DATA MERGE: BELLABONA BRAND ---
-        // Scraped Context:
-        const BRAND_DATA = "Bellabona Context: German Corporate Lunch Service. Fresh, healthy, chef-prepared meals. Sustainable 100% reusable packaging (bowls). Modern office environment in Berlin/Munich. Happy diverse corporate teams eating. High-end delivery. ";
+        // --- BRANDING ENGINE v7.0 ---
+        // Strategy: Heavy emphasis on "typography" and "text" prompt engineering.
 
-        // --- VISUAL ENGINE specs ---
+        const BRAND_DATA = "text 'BELLABONA' written clearly on the packaging. branding, logo design, typography. Bellabona Brand Context: German Corporate Lunch Service. Fresh, healthy, chef-prepared meals. Sustainable 100% reusable packaging (white and green bowls) with 'BELLABONA' logo. Modern office environment in Berlin. ";
+
         const REALISM_VARS = [
             "commercial product photography",
             "shot on Canon EOS R5",
@@ -177,7 +177,6 @@
             "natural daylight",
             "high resolution",
             "professional food styling",
-            "soft shadows",
             "authentic look"
         ];
 
@@ -191,17 +190,14 @@
             const loader = document.getElementById('loading');
             loader.classList.remove('hidden');
 
-            // --- THE MERGE ---
-            // 1. Start with Brand Data (Company Identity)
-            // 2. Add User's specific request
-            // 3. Add Realism Specs (Visual Identity)
+            // --- THE TEXT MERGE ---
+            // We put the Text instructions FIRST so the model prioritizes them.
             const promptBooster = " " + REALISM_VARS.join(", ");
             const finalPrompt = BRAND_DATA + raw + promptBooster;
 
             const seed = Math.floor(Math.random() * 100000);
 
             // Pollinations Configuration
-            // 'enhance=false' to keep the Brand Data strict
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&private=true&enhance=false&seed=${seed}&width=1600&height=1200`;
 
             const img = new Image();
@@ -227,7 +223,7 @@
                 <div class="p-4">
                     <h4 class="font-medium text-sm text-slate-800 truncate">${title}</h4>
                     <div class="mt-2 flex justify-between">
-                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">BRAND ALIGNED</span>
+                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">BRANDED</span>
                          <a href="${url}" download class="text-xs text-green-600 hover:underline">Download</a>
                     </div>
                 </div>
