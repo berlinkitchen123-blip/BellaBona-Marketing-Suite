@@ -127,11 +127,11 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col relative">
         <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8">
-            <h2 class="font-semibold text-slate-700">Campaign: AI-Driven Branding</h2>
+            <h2 class="font-semibold text-slate-700">Campaign: Clean Photography (No Text)</h2>
             <div class="flex items-center gap-4">
                 <div
                     class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
-                    ● Gemini Intelligence Active
+                    ● Pure Visual Mode
                 </div>
             </div>
         </header>
@@ -139,24 +139,24 @@
         <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
             <div class="max-w-5xl mx-auto">
                 <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Create High-Fidelity Asset</h3>
-                    <p class="text-slate-500">Using <strong>Gemini 2.0 Flash</strong> for prompt engineering & Flux for
-                        rendering.</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Create Clean Asset</h3>
+                    <p class="text-slate-500">Using <strong>Gemini 2.0 Flash</strong> configured for <strong>Logo-Free
+                            Realism</strong>.</p>
                 </div>
 
                 <div class="card p-6 shadow-sm mb-10">
                     <div class="relative">
                         <input type="text" id="promptUrl" class="chat-input pr-32"
-                            placeholder="e.g. Fresh summer salad box..." onkeydown="handleKey(event)">
+                            placeholder="e.g. Fresh summer salad bowl..." onkeydown="handleKey(event)">
                         <button onclick="generate()" class="absolute right-2 top-2 btn-primary flex items-center gap-2">
-                            <ion-icon name="sparkles"></ion-icon> Smart Generate
+                            <ion-icon name="camera"></ion-icon> Snap Photo
                         </button>
                     </div>
                 </div>
 
                 <div id="loading" class="hidden text-center py-12">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                    <p class="mt-4 text-slate-500 text-sm">Initializing Nano Banana Intelligence...</p>
+                    <p class="mt-4 text-slate-500 text-sm">Analyzing visual composition...</p>
                 </div>
 
                 <div id="gallery" class="asset-grid"></div>
@@ -170,21 +170,20 @@
         const API_KEY = "AIzaSyARXmBxQeXc0ijrCOWRq3AjMEfx7Wn6HTw";
 
         async function askGemini(userInput) {
-            // HIGHLY TUNED SYSTEM PROMPT FOR BRAND ACCURACY
+            // STRICT CLEAN MODE SYSTEM PROMPT (NO TEXT)
             const systemPrompt = `
                 ROLE: World-Class Food Stylist & AI Prompt Engineer for Brand "BELLABONA".
-                CONTEXT: Bellabona is a Premium Corporate Lunch Delivery Service in Germany.
+                CONTEXT: Bellabona is a Delivery Service in Germany.
                 
                 YOUR TASK:
                 Convert the user's simple request (e.g. "Salad") into a Perfect, Highly Detailed FLUX Image Prompt.
                 
                 CRITICAL INSTRUCTIONS:
-                1. BRANDING: The word "BELLABONA" MUST be visible on the packaging.
-                   - PROMPT SYNTAX: "text 'BELLABONA' written clearly in sans-serif font on the packaging"
-                2. STYLE: Commercial Food Photography. High-Key Lighting.
+                1. STRICTLY NO TEXT: Do NOT include any text, words, logos, or writing on packaging.
+                2. FOCUS: Pure high-end food photography.
                 3. CAMERA: Phase One XF IQ4, 100mm Macro Lens, f/8 aperture (sharp focus).
                 4. SCENE: Modern minimalist German office desk.
-                5. PACKAGING: Sustainable white/green cardboard bowls.
+                5. PACKAGING: Sustainable plain white/green cardboard bowls (NO LOGOS).
                 
                 INPUT: "${userInput}"
                 
@@ -201,7 +200,6 @@
                 });
                 const data = await response.json();
 
-                // Safety check for API errors
                 if (data.error) {
                     console.warn("Gemini Error:", data.error);
                     return null;
@@ -225,14 +223,14 @@
             loader.classList.remove('hidden');
 
             // STEP 1: SMART REFINE (Gemini)
-            statusText.innerText = "Nano Banana Analysis (Gemini 2.0)...";
+            statusText.innerText = "Nano Banana Analysis (Clean Mode)...";
             let smartPrompt = await askGemini(raw);
 
-            // Fallback logic if Gemini fails (e.g. Quota/Permission)
+            // Fallback logic if Gemini fails
             if (!smartPrompt) {
                 console.log("Using Fallback Prompt Logic");
-                const BRAND_DATA = "text 'BELLABONA' written on packaging. German Corporate Lunch Service. Fresh, healthy food. 100% reusable white/green bowls. ";
-                const TECH_SPECS = " , shot on Canon R5, 8k, professional photography, soft lighting";
+                const BRAND_DATA = "German Corporate Lunch Service. Fresh, healthy food. 100% reusable plain white/green bowls (no logo). ";
+                const TECH_SPECS = " , shot on Canon R5, 8k, professional photography, soft lighting, clean image, no text";
                 smartPrompt = BRAND_DATA + raw + TECH_SPECS;
             }
 
@@ -242,7 +240,6 @@
             const seed = Math.floor(Math.random() * 100000);
 
             // Pollinations Configuration
-            // 'enhance=false' is CRITICAL so Flux adheres to Gemini's specific prompt
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?nologo=true&private=true&enhance=false&seed=${seed}&width=1600&height=1200`;
 
             const img = new Image();
@@ -272,7 +269,7 @@
                 <div class="p-4">
                     <h4 class="font-medium text-sm text-slate-800 truncate">${title}</h4>
                     <div class="mt-2 flex justify-between">
-                         <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200">SMART GENERATION</span>
+                         <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200">CLEAN PHOTO</span>
                          <a href="${url}" download class="text-xs text-green-600 hover:underline">Download</a>
                     </div>
                 </div>
