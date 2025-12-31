@@ -110,7 +110,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight">BELLABONA<span class="text-green-500">.OS</span></h1>
-                <p class="text-xs text-slate-500">Realism Engine v5.0</p>
+                <p class="text-xs text-slate-500">Realism Engine v6.1 (Data Merged)</p>
             </div>
         </div>
 
@@ -127,11 +127,11 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col relative">
         <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8">
-            <h2 class="font-semibold text-slate-700">Campaign: Authentic Marketing</h2>
+            <h2 class="font-semibold text-slate-700">Campaign: Bellabona Germany (Q1)</h2>
             <div class="flex items-center gap-4">
                 <div
                     class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
-                    ● Photorealism Mode
+                    ● Data Integrated
                 </div>
             </div>
         </header>
@@ -139,25 +139,24 @@
         <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
             <div class="max-w-5xl mx-auto">
                 <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Create Authentic Asset</h3>
-                    <p class="text-slate-500">Generating <strong>Commercial Photography</strong> style images (Clean,
-                        Real, Non-AI look).</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Generate Brand Asset</h3>
+                    <p class="text-slate-500">Engine now combines <strong>Bellabona.com Brand Data</strong> with
+                        <strong>Photorealism</strong>.</p>
                 </div>
 
                 <div class="card p-6 shadow-sm mb-10">
                     <div class="relative">
-                        <input type="text" id="promptUrl" class="chat-input pr-32"
-                            placeholder="e.g. Fresh sustainable lunch box on a wooden desk..."
+                        <input type="text" id="promptUrl" class="chat-input pr-32" placeholder="e.g. Lunch meeting..."
                             onkeydown="handleKey(event)">
                         <button onclick="generate()" class="absolute right-2 top-2 btn-primary flex items-center gap-2">
-                            <ion-icon name="camera"></ion-icon> Snap Photo
+                            <ion-icon name="camera"></ion-icon> Generate Data-Driven Photo
                         </button>
                     </div>
                 </div>
 
                 <div id="loading" class="hidden text-center py-12">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                    <p class="mt-4 text-slate-500 text-sm">Developing Photo...</p>
+                    <p class="mt-4 text-slate-500 text-sm">Applying Brand Guidelines & Generating...</p>
                 </div>
 
                 <div id="gallery" class="asset-grid"></div>
@@ -166,23 +165,21 @@
     </main>
 
     <script>
-        // --- REALISM ENGINE v5.0 ---
-        // Strategy: Use "Commercial Photography" keywords instead of "CGI/3D" keywords.
-        // We inhibit "artistic" flair in favor of "product" fidelity.
+        // --- DATA MERGE: BELLABONA BRAND ---
+        // Scraped Context:
+        const BRAND_DATA = "Bellabona Context: German Corporate Lunch Service. Fresh, healthy, chef-prepared meals. Sustainable 100% reusable packaging (bowls). Modern office environment in Berlin/Munich. Happy diverse corporate teams eating. High-end delivery. ";
 
+        // --- VISUAL ENGINE specs ---
         const REALISM_VARS = [
             "commercial product photography",
             "shot on Canon EOS R5",
             "50mm lens",
-            "natural daylight window",
-            "authentic textures",
-            "high resolution raw photo",
+            "natural daylight",
+            "high resolution",
             "professional food styling",
-            "clean background",
-            "soft shadows"
+            "soft shadows",
+            "authentic look"
         ];
-
-        const NEGATIVE_VARS = "cartoony, 3d render, cgi, plastic skin, oversaturated, blurry, distorted, ai generated look";
 
         function handleKey(e) { if (e.key === 'Enter') generate(); }
 
@@ -194,15 +191,17 @@
             const loader = document.getElementById('loading');
             loader.classList.remove('hidden');
 
-            // Constructing the "Real" Prompt
+            // --- THE MERGE ---
+            // 1. Start with Brand Data (Company Identity)
+            // 2. Add User's specific request
+            // 3. Add Realism Specs (Visual Identity)
             const promptBooster = " " + REALISM_VARS.join(", ");
-            const finalPrompt = raw + promptBooster;
+            const finalPrompt = BRAND_DATA + raw + promptBooster;
 
             const seed = Math.floor(Math.random() * 100000);
 
-            // Pollinations Configuration for Realism
-            // Note: 'enhance=false' prevents the AI from adding its own "magic" (which often looks fake)
-            // 'nologo=true' keeps it clean
+            // Pollinations Configuration
+            // 'enhance=false' to keep the Brand Data strict
             const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&private=true&enhance=false&seed=${seed}&width=1600&height=1200`;
 
             const img = new Image();
@@ -228,7 +227,7 @@
                 <div class="p-4">
                     <h4 class="font-medium text-sm text-slate-800 truncate">${title}</h4>
                     <div class="mt-2 flex justify-between">
-                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">RAW PHOTO</span>
+                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">BRAND ALIGNED</span>
                          <a href="${url}" download class="text-xs text-green-600 hover:underline">Download</a>
                     </div>
                 </div>
