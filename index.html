@@ -81,7 +81,7 @@
 <body>
 
     <h1>🌿 BELLABONA AI</h1>
-    <div class="api-badge">Powered by Gemini 2.0 Flash + Pollinations</div>
+    <div class="api-badge">Powered by Pollinations.ai (Unlimited & Free)</div>
 
     <input type="text" id="input_prompt" class="input-box"
         placeholder="Describe marketing image (e.g. Vegan lunch box)...">
@@ -92,8 +92,6 @@
     <div id="log">Status: Ready.</div>
 
     <script>
-        const TEAM_API_KEY = "AIzaSyARXmBxQeXc0ijrCOWRq3AjMEfx7Wn6HTw";
-
         function log(msg) {
             document.getElementById('log').innerText = "Status: " + msg;
             console.log(msg);
@@ -105,52 +103,39 @@
 
             if (!prompt) { alert("Please enter a prompt!"); return; }
 
-            log("Starting Generation...");
+            log("Starting Process...");
             output.innerHTML = "";
 
-            let refined = prompt; // Default to raw prompt if AI fails
-
-            // 1. TRY GEMINI (AI REFINEMENT)
+            // 1. TEXT REFINEMENT (USING POLLINATIONS TEXT API - FREE, NO KEY)
+            let refined = prompt;
             try {
-                log("Consulting Gemini AI...");
-                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${TEAM_API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Refine this prompt for a photorealistic corporate food photo for Bellabona brand: " + prompt }] }]
-                    })
-                });
+                log("Refining Text via AI...");
+                // We use a simple GET request to Pollinations Text
+                const aiPrompt = "Better prompt for food photography: " + prompt;
+                const resp = await fetch(`https://text.pollinations.ai/${encodeURIComponent(aiPrompt)}`);
 
-                if (resp.status === 403) {
-                    throw new Error("API Key Permission Denied (403)");
+                if (resp.ok) {
+                    refined = await resp.text();
+                    log("AI Refined: " + refined.substring(0, 30) + "...");
+                } else {
+                    log("Text AI busy, using raw prompt.");
                 }
-                if (!resp.ok) {
-                    throw new Error("Gemini Error " + resp.status);
-                }
-
-                const data = await resp.json();
-                refined = data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
-                log("AI Refined Phrase: " + refined.substring(0, 20) + "...");
             } catch (err) {
-                console.warn("Gemini Failed:", err);
-                log("⚠️ Gemini API Skip (" + err.message + "). Using raw prompt.");
-                // We do NOT stop. We continue to generate the image anyway using the raw prompt.
+                console.warn(err);
+                log("Skipping Text AI (Network Error), using raw prompt.");
             }
 
-            // 2. POLLINATIONS IMAGE (Guaranteed to work)
+            // 2. IMAGE GENERATION (POLLINATIONS IMAGE API - FREE, NO KEY)
             try {
                 const seed = Math.floor(Math.random() * 9999);
-                // Add hardcoded 'Bellabona' style keywords to ensure quality even if Gemini fails
-                const styleEnhancer = " , professional food photography, 8k, appetizing, bright lighting";
-                const finalPrompt = refined + styleEnhancer;
-
-                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&seed=${seed}`;
+                // Ensure it's safe URL encoded
+                const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(refined)}?nologo=true&seed=${seed}`;
 
                 output.innerHTML = `
                     <div class="image-card">
-                        <img src="${imgUrl}" onload="log('✅ Asset Generated Successfully!')" onerror="log('Image Failed to Load')" />
-                        <div style="padding:10px; background:#222; font-size:12px; text-align:left;">
-                            <strong>Prompt:</strong> ${refined}
+                        <img src="${finalUrl}" onload="log('✅ Asset Generated Successfully!')" onerror="log('Image Failed at Provider')" />
+                        <div style="padding:10px; background:#222; font-size:12px; text-align:left; color:#ccc;">
+                            <strong>AI Prompt:</strong> ${refined}
                         </div>
                     </div>
                 `;
