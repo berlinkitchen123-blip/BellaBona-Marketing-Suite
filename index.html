@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BELLABONA AI STUDIO</title>
-    <!-- Use Standard CSS to avoid Network/CDN Timeout issues -->
+    <!-- Use Standard CSS -->
     <style>
         body {
             background-color: #0f172a;
@@ -84,17 +84,20 @@
     <h1>🌿 BELLABONA AI</h1>
     <div class="api-badge">Powered by Gemini 2.0 Flash + Pollinations</div>
 
-    <!-- Robust Inputs -->
-    <input type="password" id="input_key" class="input-box" placeholder="Paste Google API Key Here">
-    <input type="text" id="input_prompt" class="input-box" placeholder="Describe marketing image...">
+    <!-- Robust Inputs - API KEY IS HIDDEN/HARDCODED IN JS -->
+    <input type="text" id="input_prompt" class="input-box"
+        placeholder="Describe marketing image (e.g. Vegan lunch box)...">
 
     <button id="gen_btn">GENERATE ASSET</button>
 
     <div id="output"></div>
     <div id="log">Status: Ready.</div>
 
-    <!-- MAIN LOGIC (No Modules to prevent CORS/MIME errors) -->
     <script>
+        // --- HARDCODED API KEY FOR TEAM ---
+        // Warning: This key is visible in 'View Source'. Only share with trusted team.
+        const TEAM_API_KEY = "AIzaSyARXmBxQeXc0ijrCOWRq3AjMEfx7Wn6HTw";
+
         // Log Helper
         function log(msg) {
             document.getElementById('log').innerText = "Status: " + msg;
@@ -102,32 +105,27 @@
         }
 
         document.getElementById('gen_btn').addEventListener('click', async () => {
-            const key = document.getElementById('input_key').value.trim();
             const prompt = document.getElementById('input_prompt').value.trim();
             const output = document.getElementById('output');
 
-            if (!key) { alert("Please enter API Key!"); return; }
             if (!prompt) { alert("Please enter a prompt!"); return; }
-
-            // Save key
-            localStorage.setItem('bellabona_k', key);
 
             log("Calling Gemini AI...");
             output.innerHTML = ""; // Clear
 
             try {
                 // 1. GEMINI REFINEMENT
-                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${TEAM_API_KEY}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        contents: [{ parts: [{ text: "Refine this prompt for a photorealistic corporate food photo: " + prompt }] }]
+                        contents: [{ parts: [{ text: "Refine this prompt for a photorealistic corporate food photo for Bellabona brand: " + prompt }] }]
                     })
                 });
 
                 if (!resp.ok) {
                     const errTxt = await resp.text();
-                    throw new Error("Gemini API Failed: " + resp.status + " " + errTxt);
+                    throw new Error("Gemini API Failed (" + resp.status + "): " + errTxt);
                 }
 
                 const data = await resp.json();
@@ -142,7 +140,7 @@
                 output.innerHTML = `
                     <div class="image-card">
                         <img src="${imgUrl}" onload="log('Image Loaded!')" onerror="log('Image Failed to Load')" />
-                        <div style="padding:10px; background:#222; font-size:12px;">${refined}</div>
+                        <div style="padding:10px; background:#222; font-size:12px; text-align:left;">${refined}</div>
                     </div>
                 `;
 
@@ -151,10 +149,6 @@
                 alert("Error: " + err.message);
             }
         });
-
-        // Load Saved Key
-        const saved = localStorage.getItem('bellabona_k');
-        if (saved) document.getElementById('input_key').value = saved;
     </script>
 </body>
 
