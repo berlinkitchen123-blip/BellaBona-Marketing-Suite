@@ -93,7 +93,7 @@
                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                <div class="ml-auto font-mono text-xs text-gray-500">AGENT_V2.2 (DE_CORP)</div>
+                <div class="ml-auto font-mono text-xs text-gray-500">AGENT_V2.3 (TURBO)</div>
             </div>
 
             <h1 class="font-bold text-2xl tracking-tighter mb-1 text-white">BELLABONA<span class="text-bella">.AI</span>
@@ -106,6 +106,7 @@
                 <div class="text-bella">> System Initialized...</div>
                 <div>> Connected to Knowledge Base: Bellabona.com</div>
                 <div>> Loaded Context: Corporate Canteen, Germany</div>
+                <div>> Mode: Turbo (High Velocity)</div>
                 <div>> Waiting for directive...</div>
             </div>
 
@@ -145,6 +146,7 @@
                     <div class="w-16 h-16 border-4 border-bella border-t-transparent rounded-full animate-spin mb-4">
                     </div>
                     <div class="font-mono text-bella text-xs animate-pulse">GENERATING_PIXELS...</div>
+                    <div class="text-gray-500 text-xs mt-2">Using Turbo Model</div>
                 </div>
             </div>
 
@@ -194,12 +196,13 @@
             div.innerHTML = `<span class="opacity-30">[${time}]</span> ${text}`;
             if (type === 'success') div.classList.add('text-bella');
             if (type === 'process') div.classList.add('text-yellow-500');
+            div.classList.add('animate-fade-in');
             logs.appendChild(div);
             logs.scrollTop = logs.scrollHeight;
         }
 
         async function generate(promptText) {
-            // Merge User Prompt with Brand Context automatically
+            // Merge User Prompt with Brand Context
             const finalPrompt = BRAND_CONTEXT + promptText;
             currentPrompt = finalPrompt;
 
@@ -211,14 +214,15 @@
             addLog(`Directive: "${promptText}"`);
             addLog(`> Accessing Brand Database: [BELLABONA_DE]`, 'process');
 
-            // Simulating Agent "Thinking" steps
-            setTimeout(() => addLog("> Applying Sustainability Guidelines...", 'process'), 500);
-            setTimeout(() => addLog("> Contextualizing for German Office Market...", 'process'), 1200);
-            setTimeout(() => addLog("> Rendering final asset...", 'process'), 2000);
+            setTimeout(() => addLog("> Applying Sustainability Guidelines...", 'process'), 400);
+            setTimeout(() => addLog("> Contextualizing for German Office Market...", 'process'), 800);
 
-            // Real Generation (Pollinations)
-            const seed = Math.floor(Math.random() * 10000);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&seed=${seed}`;
+            // --- TURBO MODEL UPDATE ---
+            // Using 'model=turbo' to avoid Rate Limits seen by user
+            const seed = Math.floor(Math.random() * 1000000);
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&private=true&model=turbo&seed=${seed}`;
+
+            setTimeout(() => addLog(`> Sending to Algo Node [Seed: ${seed}]...`, 'process'), 1200);
 
             // Preload
             const tempImg = new Image();
@@ -230,12 +234,11 @@
 
                 addLog("> ASSET_GENERATED_SUCCESSFULLY", 'success');
 
-                // Show Editor
                 editorBar.classList.remove('opacity-0', 'pointer-events-none');
                 editorBar.classList.add('opacity-100', 'pointer-events-auto');
             };
             tempImg.onerror = () => {
-                addLog("> Error: Visual system failure", 'error');
+                addLog("> Error: Visual system failure (Rate Limited?)", 'error');
                 document.getElementById('loading').classList.add('hidden');
             }
             tempImg.src = url;
@@ -243,10 +246,7 @@
 
         window.refine = function (modifier) {
             addLog(`> Refining: ${modifier}...`);
-            // We append the modifier to the already Branded context
             generate(currentPrompt.replace(BRAND_CONTEXT, "") + ", " + modifier);
-            // Note: Logic allows appending to previous prompt, but here we just re-run generate 
-            // which re-prepends brand context. The prompt passed to generate is just the user part + modifier.
         }
 
         document.getElementById('send-btn').addEventListener('click', () => {
