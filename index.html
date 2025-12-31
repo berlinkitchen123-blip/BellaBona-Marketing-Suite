@@ -110,7 +110,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight">BELLABONA<span class="text-green-500">.OS</span></h1>
-                <p class="text-xs text-slate-500">Flux Text-Capable v7.0</p>
+                <p class="text-xs text-slate-500">Powered by Nano Banana</p>
             </div>
         </div>
 
@@ -127,11 +127,11 @@
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col relative">
         <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8">
-            <h2 class="font-semibold text-slate-700">Campaign: Branded Content (Text Enabled)</h2>
+            <h2 class="font-semibold text-slate-700">Campaign: AI-Driven Branding</h2>
             <div class="flex items-center gap-4">
                 <div
                     class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
-                    ● Typography Mode
+                    ● Gemini Intelligence Active
                 </div>
             </div>
         </header>
@@ -139,24 +139,24 @@
         <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
             <div class="max-w-5xl mx-auto">
                 <div class="mb-8">
-                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Generate Branded Asset</h3>
-                    <p class="text-slate-500">Engine now prioritizes <strong>writing 'BELLABONA'</strong> on the
-                        packaging.</p>
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Create High-Fidelity Asset</h3>
+                    <p class="text-slate-500">Using <strong>Gemini 2.0 Flash</strong> for prompt engineering & Flux for
+                        rendering.</p>
                 </div>
 
                 <div class="card p-6 shadow-sm mb-10">
                     <div class="relative">
                         <input type="text" id="promptUrl" class="chat-input pr-32"
-                            placeholder="e.g. Lunch box on desk..." onkeydown="handleKey(event)">
+                            placeholder="e.g. Fresh summer salad box..." onkeydown="handleKey(event)">
                         <button onclick="generate()" class="absolute right-2 top-2 btn-primary flex items-center gap-2">
-                            <ion-icon name="text"></ion-icon> Generate with Logo
+                            <ion-icon name="sparkles"></ion-icon> Smart Generate
                         </button>
                     </div>
                 </div>
 
                 <div id="loading" class="hidden text-center py-12">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                    <p class="mt-4 text-slate-500 text-sm">Rendering Text & Branding...</p>
+                    <p class="mt-4 text-slate-500 text-sm">Initializing Nano Banana Intelligence...</p>
                 </div>
 
                 <div id="gallery" class="asset-grid"></div>
@@ -165,45 +165,90 @@
     </main>
 
     <script>
-        // --- BRANDING ENGINE v7.0 ---
-        // Strategy: Heavy emphasis on "typography" and "text" prompt engineering.
+        // --- NANO BANANA INTELLIGENCE (Gemini 2.0 Flash) ---
+        // This is the Brain that writes the perfect prompt for Flux.
+        const API_KEY = "AIzaSyARXmBxQeXc0ijrCOWRq3AjMEfx7Wn6HTw";
 
-        const BRAND_DATA = "text 'BELLABONA' written clearly on the packaging. branding, logo design, typography. Bellabona Brand Context: German Corporate Lunch Service. Fresh, healthy, chef-prepared meals. Sustainable 100% reusable packaging (white and green bowls) with 'BELLABONA' logo. Modern office environment in Berlin. ";
+        async function askGemini(userInput) {
+            // HIGHLY TUNED SYSTEM PROMPT FOR BRAND ACCURACY
+            const systemPrompt = `
+                ROLE: World-Class Food Stylist & AI Prompt Engineer for Brand "BELLABONA".
+                CONTEXT: Bellabona is a Premium Corporate Lunch Delivery Service in Germany.
+                
+                YOUR TASK:
+                Convert the user's simple request (e.g. "Salad") into a Perfect, Highly Detailed FLUX Image Prompt.
+                
+                CRITICAL INSTRUCTIONS:
+                1. BRANDING: The word "BELLABONA" MUST be visible on the packaging.
+                   - PROMPT SYNTAX: "text 'BELLABONA' written clearly in sans-serif font on the packaging"
+                2. STYLE: Commercial Food Photography. High-Key Lighting.
+                3. CAMERA: Phase One XF IQ4, 100mm Macro Lens, f/8 aperture (sharp focus).
+                4. SCENE: Modern minimalist German office desk.
+                5. PACKAGING: Sustainable white/green cardboard bowls.
+                
+                INPUT: "${userInput}"
+                
+                OUTPUT: Just the final detailed prompt string. No explanations.
+            `;
 
-        const REALISM_VARS = [
-            "commercial product photography",
-            "shot on Canon EOS R5",
-            "50mm lens",
-            "natural daylight",
-            "high resolution",
-            "professional food styling",
-            "authentic look"
-        ];
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: systemPrompt }] }]
+                    })
+                });
+                const data = await response.json();
+
+                // Safety check for API errors
+                if (data.error) {
+                    console.warn("Gemini Error:", data.error);
+                    return null;
+                }
+
+                return data.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+            } catch (e) {
+                console.error("Gemini Connection Failed", e);
+                return null;
+            }
+        }
 
         function handleKey(e) { if (e.key === 'Enter') generate(); }
 
-        function generate() {
+        async function generate() {
             const raw = document.getElementById('promptUrl').value;
             if (!raw) return;
 
-            const gallery = document.getElementById('gallery');
             const loader = document.getElementById('loading');
+            const statusText = loader.querySelector('p');
             loader.classList.remove('hidden');
 
-            // --- THE TEXT MERGE ---
-            // We put the Text instructions FIRST so the model prioritizes them.
-            const promptBooster = " " + REALISM_VARS.join(", ");
-            const finalPrompt = BRAND_DATA + raw + promptBooster;
+            // STEP 1: SMART REFINE (Gemini)
+            statusText.innerText = "Nano Banana Analysis (Gemini 2.0)...";
+            let smartPrompt = await askGemini(raw);
+
+            // Fallback logic if Gemini fails (e.g. Quota/Permission)
+            if (!smartPrompt) {
+                console.log("Using Fallback Prompt Logic");
+                const BRAND_DATA = "text 'BELLABONA' written on packaging. German Corporate Lunch Service. Fresh, healthy food. 100% reusable white/green bowls. ";
+                const TECH_SPECS = " , shot on Canon R5, 8k, professional photography, soft lighting";
+                smartPrompt = BRAND_DATA + raw + TECH_SPECS;
+            }
+
+            // STEP 2: GENERATE (Pollinations/Flux)
+            statusText.innerText = "Rendering High-Fidelity Asset...";
 
             const seed = Math.floor(Math.random() * 100000);
 
             // Pollinations Configuration
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&private=true&enhance=false&seed=${seed}&width=1600&height=1200`;
+            // 'enhance=false' is CRITICAL so Flux adheres to Gemini's specific prompt
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(smartPrompt)}?nologo=true&private=true&enhance=false&seed=${seed}&width=1600&height=1200`;
 
             const img = new Image();
             img.onload = () => {
                 loader.classList.add('hidden');
-                addCard(url, raw);
+                addCard(url, raw, smartPrompt);
             };
             img.onerror = () => {
                 loader.classList.add('hidden');
@@ -212,18 +257,22 @@
             img.src = url;
         }
 
-        function addCard(url, title) {
+        function addCard(url, title, fullPrompt) {
             const gallery = document.getElementById('gallery');
             const card = document.createElement('div');
             card.className = "card animate-up group";
             card.innerHTML = `
                 <div class="relative aspect-[4/3] bg-slate-100 overflow-hidden cursor-pointer" onclick="window.open('${url}')">
                     <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    <!-- Hover to see what Gemini wrote -->
+                    <div class="absolute bottom-0 left-0 right-0 bg-black/70 text-white text-[10px] p-2 opacity-0 group-hover:opacity-100 transition-opacity truncate">
+                        AI Prompt: ${fullPrompt}
+                    </div>
                 </div>
                 <div class="p-4">
                     <h4 class="font-medium text-sm text-slate-800 truncate">${title}</h4>
                     <div class="mt-2 flex justify-between">
-                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">BRANDED</span>
+                         <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded border border-green-200">SMART GENERATION</span>
                          <a href="${url}" download class="text-xs text-green-600 hover:underline">Download</a>
                     </div>
                 </div>
