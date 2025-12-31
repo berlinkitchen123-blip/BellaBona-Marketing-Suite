@@ -93,7 +93,7 @@
                 <div class="w-3 h-3 rounded-full bg-red-500"></div>
                 <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
                 <div class="w-3 h-3 rounded-full bg-green-500"></div>
-                <div class="ml-auto font-mono text-xs text-gray-500">AGENT_V2.1</div>
+                <div class="ml-auto font-mono text-xs text-gray-500">AGENT_V2.2 (DE_CORP)</div>
             </div>
 
             <h1 class="font-bold text-2xl tracking-tighter mb-1 text-white">BELLABONA<span class="text-bella">.AI</span>
@@ -104,6 +104,8 @@
             <div id="agent-logs"
                 class="flex-1 font-mono text-xs space-y-2 overflow-y-auto max-h-[300px] text-gray-400 mb-6 p-2 rounded border border-white/5 bg-black/20">
                 <div class="text-bella">> System Initialized...</div>
+                <div>> Connected to Knowledge Base: Bellabona.com</div>
+                <div>> Loaded Context: Corporate Canteen, Germany</div>
                 <div>> Waiting for directive...</div>
             </div>
 
@@ -113,7 +115,7 @@
                 <div class="relative">
                     <input type="text" id="prompt"
                         class="w-full bg-black/50 border border-white/10 rounded-lg p-3 pr-10 text-white text-sm focus:border-bella focus:outline-none focus:ring-1 focus:ring-bella transition-all font-sans"
-                        placeholder="e.g. Sushi box, minimalist...">
+                        placeholder="e.g. Summer salad promo...">
                     <button id="send-btn" class="absolute right-2 top-2 text-bella hover:text-white transition-colors">
                         ➤
                     </button>
@@ -154,13 +156,13 @@
                 <button onclick="refine('make it brighter')"
                     class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white transition-all">☀
                     Brighter</button>
-                <button onclick="refine('add corporate people')"
+                <button onclick="refine('add corporate working people')"
                     class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white transition-all">👥
                     +People</button>
                 <button onclick="refine('minimalist style')"
                     class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white transition-all">✨
                     Minimal</button>
-                <button onclick="refine('high contrast, professional')"
+                <button onclick="refine('high contrast, professional food photography')"
                     class="px-3 py-1 bg-white/10 hover:bg-white/20 rounded text-xs text-white transition-all">📸
                     Pro-Cam</button>
 
@@ -183,6 +185,9 @@
 
         let currentPrompt = "";
 
+        // --- BELLABONA BRAND CONTEXT ---
+        const BRAND_CONTEXT = "Bellabona Style: High-quality corporate lunch delivery in Germany. Fresh, healthy chef-prepared food in sustainable eco-friendly packaging. Modern german office setting. Professional lighting, 8k resolution, photorealistic app advertisement. ";
+
         function addLog(text, type = 'neutral') {
             const div = document.createElement('div');
             const time = new Date().toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -194,22 +199,26 @@
         }
 
         async function generate(promptText) {
-            currentPrompt = promptText;
+            // Merge User Prompt with Brand Context automatically
+            const finalPrompt = BRAND_CONTEXT + promptText;
+            currentPrompt = finalPrompt;
+
             document.getElementById('loading').classList.remove('hidden');
             document.getElementById('placeholder').classList.add('hidden');
             editorBar.classList.remove('opacity-100', 'pointer-events-auto');
             editorBar.classList.add('opacity-0', 'pointer-events-none');
 
-            addLog(`Directive received: "${promptText}"`);
+            addLog(`Directive: "${promptText}"`);
+            addLog(`> Accessing Brand Database: [BELLABONA_DE]`, 'process');
 
             // Simulating Agent "Thinking" steps
-            setTimeout(() => addLog("> Analyzing context...", 'process'), 500);
-            setTimeout(() => addLog("> Optimizing lighting parameters...", 'process'), 1200);
+            setTimeout(() => addLog("> Applying Sustainability Guidelines...", 'process'), 500);
+            setTimeout(() => addLog("> Contextualizing for German Office Market...", 'process'), 1200);
             setTimeout(() => addLog("> Rendering final asset...", 'process'), 2000);
 
             // Real Generation (Pollinations)
             const seed = Math.floor(Math.random() * 10000);
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(promptText)}?nologo=true&seed=${seed}`;
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&seed=${seed}`;
 
             // Preload
             const tempImg = new Image();
@@ -234,7 +243,10 @@
 
         window.refine = function (modifier) {
             addLog(`> Refining: ${modifier}...`);
-            generate(currentPrompt + ", " + modifier);
+            // We append the modifier to the already Branded context
+            generate(currentPrompt.replace(BRAND_CONTEXT, "") + ", " + modifier);
+            // Note: Logic allows appending to previous prompt, but here we just re-run generate 
+            // which re-prepends brand context. The prompt passed to generate is just the user part + modifier.
         }
 
         document.getElementById('send-btn').addEventListener('click', () => {
