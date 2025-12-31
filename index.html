@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>BELLABONA | Marketing AI Studio</title>
+    <!-- React & DOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        bella: {
+                            50: '#f2fcf5',
+                            100: '#e1f8e8',
+                            500: '#00a859', // Official Bellabona Green
+                            600: '#008f4c',
+                            700: '#00753e',
+                            900: '#004d29',
+                        },
+                        dark: {
+                            900: '#0f172a',
+                            800: '#1e293b',
+                            700: '#334155',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Iconic Icons -->
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+    <!-- Firebase SDK (Modular) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        window.firebaseApp = initializeApp;
+        window.firebaseFirestore = getFirestore;
+        window.firebaseCollection = collection;
+        window.firebaseAddDoc = addDoc;
+        window.firebaseGetDocs = getDocs;
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        body.dark-mode {
+            background-color: #0f172a;
+            color: white;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        .dark-mode .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.2.3",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
+    "react/": "https://esm.sh/react@^19.2.3/",
+    "@google/genai": "https://esm.sh/@google/genai@^1.34.0",
+    "lucide-react": "https://esm.sh/lucide-react@^0.562.0",
+    "recharts": "https://esm.sh/recharts@^3.6.0"
+  }
+}
+</script>
+</head>
+<body class="dark-mode"> <!-- Default to Dark Mode -->
+    <div id="root"></div>
+    <script type="text/babel" data-presets="react">
+        const { useState, useEffect } = React;
+        // --- USER PROVIDED FIREBASE CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyARXmBxQeXc0ijrCOWRq3AjMEfx7Wn6HTw",
+            authDomain: "bellabona-marketing-suite.firebaseapp.com",
+            projectId: "bellabona-marketing-suite",
+            storageBucket: "bellabona-marketing-suite.firebasestorage.app",
+            messagingSenderId: "379790797926",
+            appId: "1:379790797926:web:18b79127b22717edbd11a7"
+        };
+        // Initialize Firebase (Safely)
+        let db = null;
+        try {
+            if (window.firebaseApp) {
+                const app = window.firebaseApp(firebaseConfig);
+                db = window.firebaseFirestore(app);
+                console.log("Firebase initialized for Bellabona!");
+            }
+        } catch (e) { console.error("Firebase init error", e); }
+        const translations = {
+            en: {
+                nav_generate: "Generate Assets",
+                nav_video: "TV Commercials",
+                title_main: "Marketing Intelligence",
+                subtitle: "Create premium assets for the German & International market.",
+                input_placeholder: "Describe the campaign (e.g., 'Fresh summer salad bowl for office lunch')...",
+                btn_generate: "Generate Concepts",
+                video_mode: "5S Video Looper",
+                lang_label: "Language",
+                mode_label: "Dark Mode"
+            },
+            de: {
+                nav_generate: "Assets Generieren",
+                nav_video: "TV Werbespots",
+                title_main: "Marketing Intelligenz",
+                subtitle: "Erstellen Sie Premium-Assets für den deutschen & internationalen Markt.",
+                input_placeholder: "Beschreiben Sie die Kampagne (z. B. 'Frische Sommersalat-Bowl für das Büroumfeld')...",
+                btn_generate: "Konzepte Generieren",
+                video_mode: "5S Video Schleife",
+                lang_label: "Sprache",
+                mode_label: "Dunkelmodus"
+            }
+        };
+        function App() {
+            const [lang, setLang] = useState('de');
+            const [darkMode, setDarkMode] = useState(true);
+            const [activeTab, setActiveTab] = useState('generate');
+            const [apiKey, setApiKey] = useState(localStorage.getItem('bellabona_api_key') || '');
+            const [prompt, setPrompt] = useState('');
+            const [generatedItems, setGeneratedItems] = useState([]);
+            const [isGenerating, setIsGenerating] = useState(false);
+            const [videoClips, setVideoClips] = useState([]);
+            const [selectedClips, setSelectedClips] = useState(new Set());
+            const t = translations[lang];
+            useEffect(() => {
+                if (darkMode) {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
+            }, [darkMode]);
+            const saveApiKey = (key) => {
+                setApiKey(key);
+                localStorage.setItem('bellabona_api_key', key);
+            };
+            // --- CORE AI LOGIC ---
+            const handleGenerate = async () => {
+                if (!prompt) return;
+                if (!apiKey) {
+                    alert("Please enter your Google AI Studio API Key first!");
+                    return;
+                }
+                setIsGenerating(true);
+                try {
+                    // STEP 1: Ask Gemini to act as BellaBona CMO and refine the prompt
+                    const systemInstruction = `You are the Bellabona Marketing AI.
+            Task: Convert the user's input into a photorealistic image generation prompt.
+            Brand: Corporate lunch, healthy, sustainable, Bellabona (Green/White/Fresh).
+            Output: ONLY the refined prompt text. No "Here is the prompt" prefix.`;
+                    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: `${systemInstruction}\n\nUser Input: ${prompt}` }]
+                            }]
+                        })
+                    });
+                    if (!response.ok) throw new Error("Gemini API Error: " + response.statusText);
+                    const data = await response.json();
+                    const refinedPrompt = data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+                    // STEP 2: Use Pollinations for FREE Unlimited Generation
+                    const encodedPrompt = encodeURIComponent(refinedPrompt + " photorealistic, 8k, highly detailed, food photography");
+                    const seed = Math.floor(Math.random() * 100000);
+                    const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?nologo=true&private=true&enhance=true&seed=${seed}`;
+                    // Pre-load logic
+                    const img = new Image();
+                    img.onload = () => {
+                        const newItem = {
+                            id: Date.now(),
+                            type: 'image',
+                            url: imageUrl,
+                            title: `Asset #${generatedItems.length + 1}`,
+                            originalPrompt: prompt,
+                            refinedPrompt: refinedPrompt
+                        };
+                        setGeneratedItems([newItem, ...generatedItems]);
+                        setIsGenerating(false);
+                        // SAVE TO FIREBASE (If connected)
+                        if (db && window.firebaseAddDoc && window.firebaseCollection) {
+                            try {
+                                window.firebaseAddDoc(window.firebaseCollection(db, "assets"), newItem);
+                                console.log("Assets saved to Firebase!");
+                            } catch (err) { console.error("Saving to Firebase failed:", err); }
+                        }
+                    };
+                    img.onerror = () => {
+                        setIsGenerating(false);
+                        alert("Image generation failed. Please try again.");
+                    };
+                    img.src = imageUrl;
+                } catch (error) {
+                    console.error(error);
+                    alert("Error: " + error.message);
+                    setIsGenerating(false);
+                }
+            };
+            const handleGenerateVideo = () => {
+                // Simulating Video Clip Generation plan
+                const keywords = ["Zoom In", "Pan Left", "Slow Motion", "Fade In"];
+                const randomEffect = keywords[Math.floor(Math.random() * keywords.length)];
+                const seed = Math.floor(Math.random() * 1000);
+                const newClip = {
+                    id: Date.now(),
+                    duration: 5,
+                    title: `Clip ${(videoClips.length + 1).toString().padStart(2, '0')}`,
+                    thumbnail: `https://image.pollinations.ai/prompt/corporate%20lunch%20video%20frame%20${randomEffect}?seed=${seed}&width=400&height=300&nologo=true`,
+                    effect: randomEffect
+                };
+                setVideoClips([...videoClips, newClip]);
+            };
+            const toggleClipSelection = (id) => {
+                const newSet = new Set(selectedClips);
+                if (newSet.has(id)) newSet.delete(id);
+                else newSet.add(id);
+                setSelectedClips(newSet);
+            };
+            const handleClubVideo = () => {
+                if (selectedClips.size === 0) return;
+                alert(`Merging ${selectedClips.size} clips into a Master Reel!`);
+            };
+            return (
+                <div className="min-h-screen flex selection:bg-bella-500 selection:text-white">
+                    {/* Sidebar */}
+                    <aside className="w-64 glass-panel fixed h-full z-10 flex flex-col p-6 hidden md:flex border-r border-gray-200 dark:border-white/10">
+                        <div className="flex items-center gap-3 mb-10">
+                            <div className="w-8 h-8 rounded bg-gradient-to-br from-bella-500 to-bella-700 flex items-center justify-center text-white">
+                                <ion-icon name="leaf"></ion-icon>
+                            </div>
+                            <h1 className="text-xl font-bold tracking-tight text-gray-900 dark:text-white">BELLABONA</h1>
+                        </div>
+                        <nav className="flex-1 space-y-2">
+                            <NavButton icon="images-outline" label={t.nav_generate} active={activeTab === 'generate'} onClick={() => setActiveTab('generate')} darkMode={darkMode} />
+                            <NavButton icon="videocam-outline" label={t.nav_video} active={activeTab === 'video'} onClick={() => setActiveTab('video')} darkMode={darkMode} />
+                        </nav>
+                        <div className="pt-6 border-t border-gray-200 dark:border-white/10 space-y-4">
+                            <div>
+                                <label className="text-xs text-gray-400 uppercase tracking-wider font-semibold mb-2 block">{t.lang_label}</label>
+                                <div className="flex gap-2">
+                                    <button onClick={() => setLang('de')} className={`px-3 py-1 rounded text-sm transition ${lang === 'de' ? 'bg-bella-600 text-white' : 'bg-gray-200 dark:bg-dark-800 text-gray-500'}`}>DE</button>
+                                    <button onClick={() => setLang('en')} className={`px-3 py-1 rounded text-sm transition ${lang === 'en' ? 'bg-bella-600 text-white' : 'bg-gray-200 dark:bg-dark-800 text-gray-500'}`}>EN</button>
+                                </div>
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-500">{t.mode_label}</span>
+                                <button onClick={() => setDarkMode(!darkMode)} className={`w-12 h-6 rounded-full p-1 transition-colors ${darkMode ? 'bg-bella-600' : 'bg-gray-300'}`}>
+                                    <div className={`w-4 h-4 rounded-full bg-white shadow-sm transition-transform ${darkMode ? 'translate-x-6' : 'translate-x-0'}`} />
+                                </button>
+                            </div>
+                        </div>
+                    </aside>
+                    {/* Main Content */}
+                    <main className="flex-1 ml-0 md:ml-64 p-8 relative">
+                        <header className="flex justify-between items-center mb-12">
+                            <div>
+                                <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">{t.title_main} <span className="text-bella-500">AI Studio</span></h2>
+                                <p className="text-gray-500 dark:text-gray-400">{t.subtitle}</p>
+                            </div>
+                            {!apiKey && (
+                                <div className="bg-orange-500/10 border border-orange-500/50 text-orange-600 dark:text-orange-200 px-4 py-2 rounded-lg text-sm flex items-center gap-2">
+                                    <ion-icon name="warning-outline"></ion-icon> Setup API Key
+                                </div>
+                            )}
+                        </header>
+                        {!apiKey && (
+                            <div className="glass-panel p-6 rounded-2xl mb-8 max-w-2xl mx-auto animate-fade-in shadow-xl">
+                                <h3 className="text-lg font-semibold mb-3 text-gray-900 dark:text-white">Connect Google AI (Free)</h3>
+                                <div className="flex gap-2">
+                                    <input type="password" placeholder="Paste Gemini API Key here..." className="flex-1 bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-gray-700 rounded-lg px-4 py-3 text-gray-900 dark:text-white outline-none focus:ring-2 focus:ring-bella-500" onBlur={(e) => saveApiKey(e.target.value)} />
+                                    <a href="https://aistudio.google.com/app/apikey" target="_blank" className="bg-gray-200 dark:bg-dark-700 px-4 py-3 rounded-lg hover:opacity-80 transition flex items-center"><ion-icon name="open-outline"></ion-icon></a>
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'generate' && (
+                            <div className="max-w-5xl mx-auto animate-fade-in">
+                                <div className="glass-panel p-2 rounded-2xl flex gap-2 mb-10 shadow-xl sticky top-4 z-20 border border-gray-200 dark:border-white/5">
+                                    <input className="flex-1 bg-transparent border-none text-lg px-6 py-4 focus:outline-none placeholder-gray-400 text-gray-900 dark:text-white" placeholder={t.input_placeholder} value={prompt} onChange={(e) => setPrompt(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleGenerate()} />
+                                    <button onClick={handleGenerate} disabled={isGenerating} className="bg-bella-600 hover:bg-bella-500 text-white px-8 rounded-xl font-semibold transition-all flex items-center gap-2 disabled:opacity-50">
+                                        {isGenerating ? <ion-icon name="aperture" class="animate-spin"></ion-icon> : <ion-icon name="sparkles"></ion-icon>} {t.btn_generate}
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+                                    {generatedItems.length === 0 && <div className="col-span-full py-20 text-center text-gray-400 border-2 border-dashed border-gray-700 rounded-3xl"><ion-icon name="nutrition-outline" style={{ fontSize: "48px" }}></ion-icon><p className="mt-4">Enter a concept to start generating.</p></div>}
+                                    {generatedItems.map((item) => (
+                                        <div key={item.id} className="glass-panel rounded-2xl overflow-hidden group hover:shadow-2xl transition-all border border-gray-200 dark:border-white/5">
+                                            <div className="h-64 bg-gray-100 dark:bg-dark-800 relative overflow-hidden">
+                                                <img src={item.url} alt="Asset" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                                    <a href={item.url} target="_blank" download className="bg-white text-black p-3 rounded-full hover:scale-110 transition"><ion-icon name="download"></ion-icon></a>
+                                                </div>
+                                            </div>
+                                            <div className="p-4">
+                                                <h4 className="font-semibold text-gray-900 dark:text-white">{item.title}</h4>
+                                                <p className="text-xs text-gray-400 mt-1 line-clamp-2">{item.refinedPrompt}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                        {activeTab === 'video' && (
+                            <div className="text-center py-20 text-gray-500">
+                                <ion-icon name="film-outline" style={{ fontSize: "48px" }}></ion-icon>
+                                <h3 className="text-xl font-bold mt-4">Video Studio</h3>
+                                <p className="mb-6">Generate 5-second clips and merge them.</p>
+                                <button onClick={handleGenerateVideo} className="bg-bella-600 text-white px-6 py-2 rounded-full">Generate Test Clip</button>
+                                <div className="grid grid-cols-4 gap-4 mt-8">
+                                    {videoClips.map(clip => (
+                                        <div key={clip.id} className="aspect-video bg-gray-800 rounded-lg overflow-hidden relative" onClick={() => toggleClipSelection(clip.id)}>
+                                            <img src={clip.thumbnail} className="w-full h-full object-cover opacity-70" />
+                                            {selectedClips.has(clip.id) && <div className="absolute top-2 right-2 text-bella-500 bg-white rounded-full"><ion-icon name="checkmark-circle"></ion-icon></div>}
+                                        </div>
+                                    ))}
+                                </div>
+                                {selectedClips.size > 0 && <button onClick={handleClubVideo} className="mt-8 bg-white text-black px-8 py-3 rounded-full font-bold">Merge Selected</button>}
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        }
+        function NavButton({ icon, label, active, onClick, darkMode }) {
+            return (
+                <button onClick={onClick} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${active ? 'bg-bella-600 text-white shadow-lg' : 'text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-white/5'}`}>
+                    <ion-icon name={icon} style={{ fontSize: "1.2rem" }}></ion-icon> <span className="font-medium text-sm">{label}</span>
+                </button>
+            );
+        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
