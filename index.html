@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BELLABONA AI STUDIO</title>
+    <!-- Use Standard CSS to avoid Network/CDN Timeout issues -->
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+            font-family: sans-serif;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .input-box {
+            display: block;
+            width: 80%;
+            max-width: 500px;
+            padding: 15px;
+            margin: 10px auto;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #222;
+            color: #fff;
+            font-size: 16px;
+        }
+
+        button {
+            background: #00a859;
+            color: white;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+            width: 80%;
+            max-width: 500px;
+        }
+
+        button:hover {
+            background: #008f4c;
+        }
+
+        #log {
+            color: #888;
+            font-size: 12px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+
+        .image-card {
+            border: 2px solid #333;
+            margin: 20px auto;
+            max-width: 500px;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .api-badge {
+            background: #222;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid #444;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🌿 BELLABONA AI</h1>
+    <div class="api-badge">Powered by Gemini 2.0 Flash + Pollinations</div>
+
+    <!-- Robust Inputs -->
+    <input type="password" id="input_key" class="input-box" placeholder="Paste Google API Key Here">
+    <input type="text" id="input_prompt" class="input-box" placeholder="Describe marketing image...">
+
+    <button id="gen_btn">GENERATE ASSET</button>
+
+    <div id="output"></div>
+    <div id="log">Status: Ready.</div>
+
+    <!-- MAIN LOGIC (No Modules to prevent CORS/MIME errors) -->
+    <script>
+        // Log Helper
+        function log(msg) {
+            document.getElementById('log').innerText = "Status: " + msg;
+            console.log(msg);
+        }
+
+        document.getElementById('gen_btn').addEventListener('click', async () => {
+            const key = document.getElementById('input_key').value.trim();
+            const prompt = document.getElementById('input_prompt').value.trim();
+            const output = document.getElementById('output');
+
+            if (!key) { alert("Please enter API Key!"); return; }
+            if (!prompt) { alert("Please enter a prompt!"); return; }
+
+            // Save key
+            localStorage.setItem('bellabona_k', key);
+
+            log("Calling Gemini AI...");
+            output.innerHTML = ""; // Clear
+
+            try {
+                // 1. GEMINI REFINEMENT
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: "Refine this prompt for a photorealistic corporate food photo: " + prompt }] }]
+                    })
+                });
+
+                if (!resp.ok) {
+                    const errTxt = await resp.text();
+                    throw new Error("Gemini API Failed: " + resp.status + " " + errTxt);
+                }
+
+                const data = await resp.json();
+                const refined = data.candidates?.[0]?.content?.parts?.[0]?.text || prompt;
+                log("Refined: " + refined.substring(0, 30) + "...");
+
+                // 2. POLLINATIONS IMAGE
+                const seed = Math.floor(Math.random() * 9999);
+                const imgUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(refined)}?nologo=true&seed=${seed}`;
+
+                // 3. SHOW RESULT
+                output.innerHTML = `
+                    <div class="image-card">
+                        <img src="${imgUrl}" onload="log('Image Loaded!')" onerror="log('Image Failed to Load')" />
+                        <div style="padding:10px; background:#222; font-size:12px;">${refined}</div>
+                    </div>
+                `;
+
+            } catch (err) {
+                log("Error: " + err.message);
+                alert("Error: " + err.message);
+            }
+        });
+
+        // Load Saved Key
+        const saved = localStorage.getItem('bellabona_k');
+        if (saved) document.getElementById('input_key').value = saved;
+    </script>
+</body>
+
+</html>
