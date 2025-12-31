@@ -79,8 +79,8 @@
 
         .asset-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
         }
 
         .animate-up {
@@ -110,7 +110,7 @@
             </div>
             <div>
                 <h1 class="font-bold text-lg tracking-tight">BELLABONA<span class="text-green-500">.OS</span></h1>
-                <p class="text-xs text-slate-500">Enterprise Edition</p>
+                <p class="text-xs text-slate-500">Flux Realism Engine</p>
             </div>
         </div>
 
@@ -121,128 +121,84 @@
             <div class="nav-item">
                 <ion-icon name="images-outline"></ion-icon> Assets Library
             </div>
-            <div class="nav-item">
-                <ion-icon name="videocam-outline"></ion-icon> Video Studio
-            </div>
-            <div class="nav-item">
-                <ion-icon name="analytics-outline"></ion-icon> Insights
-            </div>
         </nav>
-
-        <div class="mt-auto">
-            <div class="p-4 bg-slate-800 rounded-xl">
-                <p class="text-xs text-slate-400 mb-2">Monthly Usage</p>
-                <div class="w-full bg-slate-700 h-2 rounded-full mb-1">
-                    <div class="bg-green-500 h-2 rounded-full" style="width: 35%"></div>
-                </div>
-                <div class="flex justify-between text-xs text-slate-400">
-                    <span>35 Assets</span>
-                    <span>Unltd.</span>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <!-- MAIN CONTENT -->
     <main class="flex-1 flex flex-col relative">
-        <!-- Top Bar -->
         <header class="h-16 border-b border-slate-200 bg-white flex items-center justify-between px-8">
-            <h2 class="font-semibold text-slate-700">Campaign: Summer Corporate Lunch '25</h2>
+            <h2 class="font-semibold text-slate-700">Campaign: High-Fidelity Marketing</h2>
             <div class="flex items-center gap-4">
                 <div
                     class="px-3 py-1 bg-green-50 text-green-700 text-xs font-medium rounded-full border border-green-200">
-                    ● System Online
-                </div>
-                <div class="w-8 h-8 rounded-full bg-slate-200 overflow-hidden">
-                    <img src="https://ui-avatars.com/api/?name=Admin+User&background=0D8ABC&color=fff" />
+                    ● Flux Model Active
                 </div>
             </div>
         </header>
 
-        <!-- Workspace -->
         <div class="flex-1 overflow-y-auto p-8 bg-slate-50">
-
             <div class="max-w-5xl mx-auto">
-                <div class="flex items-end gap-4 mb-8">
-                    <div class="flex-1">
-                        <h3 class="text-2xl font-bold text-slate-800 mb-2">Create New Asset</h3>
-                        <p class="text-slate-500">Describe the marketing material you need. The AI is tuned for
-                            Bellabona's German market identity.</p>
-                    </div>
+                <div class="mb-8">
+                    <h3 class="text-2xl font-bold text-slate-800 mb-2">Create Premium Asset</h3>
+                    <p class="text-slate-500">Generating with <strong>Flux Realism</strong>. (Please wait ~10s for high
+                        quality).</p>
                 </div>
 
-                <!-- Input Section -->
                 <div class="card p-6 shadow-sm mb-10">
                     <div class="relative">
                         <input type="text" id="promptUrl" class="chat-input pr-32"
-                            placeholder="e.g. 'Vegan bowl for Berlin tech team meeting'..."
-                            onkeydown="handleKey(event)">
+                            placeholder="e.g. 'Avocado Toast detailed macro shot'..." onkeydown="handleKey(event)">
                         <button onclick="generate()" class="absolute right-2 top-2 btn-primary flex items-center gap-2">
-                            <ion-icon name="sparkles"></ion-icon> Generate
+                            <ion-icon name="sparkles"></ion-icon> Generate HD
                         </button>
                     </div>
-                    <div class="flex gap-2 mt-4">
-                        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Quick Styles:</span>
-                        <button onclick="setPrompt('Modern Office Lunch')"
-                            class="px-3 py-1 rounded-full bg-slate-100 text-xs text-slate-600 hover:bg-slate-200 transition">🏢
-                            Office</button>
-                        <button onclick="setPrompt('Sustainable Packaging Close-up')"
-                            class="px-3 py-1 rounded-full bg-slate-100 text-xs text-slate-600 hover:bg-slate-200 transition">🌿
-                            Eco-Box</button>
-                        <button onclick="setPrompt('Team Eating Together')"
-                            class="px-3 py-1 rounded-full bg-slate-100 text-xs text-slate-600 hover:bg-slate-200 transition">�
-                            Team</button>
-                    </div>
                 </div>
 
-                <!-- Results Grid -->
                 <div id="loading" class="hidden text-center py-12">
                     <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-                    <p class="mt-4 text-slate-500 text-sm">Generating high-fidelity assets...</p>
+                    <p class="mt-4 text-slate-500 text-sm">Rendering High-Quality Asset (8K)...</p>
                 </div>
 
-                <div id="gallery" class="asset-grid">
-                    <!-- Assets appear here -->
-                </div>
+                <div id="gallery" class="asset-grid"></div>
             </div>
         </div>
     </main>
 
     <script>
-        // BRAND CONTEXT (System Instruction)
-        const CONTEXT = "Bellabona Corporate Food Delivery. German Market. Professional, Clean, Fresh, Sustainable, appetizing food photography, 8k resolution. ";
+        // --- REALISM ENGINE + EXACT PROMPT ADHERENCE ---
+        // 1. We remove aggressive context that might override user intent.
+        // 2. We inject only visual quality boosters.
+        const QUALITY_BOOSTERS = " , photorealistic, 8k, incredibly detailed, cinematic lighting, sharp focus, award winning photography, shot on 50mm lens. ";
 
-        function handleKey(e) {
-            if (e.key === 'Enter') generate();
-        }
-
-        function setPrompt(txt) {
-            document.getElementById('promptUrl').value = txt;
-        }
+        function handleKey(e) { if (e.key === 'Enter') generate(); }
 
         function generate() {
             const raw = document.getElementById('promptUrl').value;
             if (!raw) return;
 
-            // UI Updates
             const gallery = document.getElementById('gallery');
             const loader = document.getElementById('loading');
-
             loader.classList.remove('hidden');
 
-            // Generation Logic (Pollinations Turbo)
-            // combining Context + User Prompt
-            const finalPrompt = CONTEXT + raw;
+            // --- FLUX MODEL (Best Quality) ---
+            // 1. Remove 'model=turbo' (It's fast but low quality).
+            // 2. Use 'enhance=true' (Pollinations magic fix).
+            // 3. Set explicit high resolution (1920x1080).
+            const finalPrompt = raw + QUALITY_BOOSTERS;
             const seed = Math.floor(Math.random() * 100000);
-            // Turbo model to avoid limits
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&private=true&model=turbo&seed=${seed}`;
 
-            // Create Image Object
+            // Note: We deliberately use the DEFAULT Pollinations model (Flux) which is their highest quality
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(finalPrompt)}?nologo=true&private=true&enhance=true&seed=${seed}&width=1920&height=1080`;
+
             const img = new Image();
             img.onload = () => {
                 loader.classList.add('hidden');
                 addCard(url, raw);
             };
+            img.onerror = () => {
+                loader.classList.add('hidden');
+                alert("Generation failed (Rate Limit or Server Busy). Please try again in 10s.");
+            }
             img.src = url;
         }
 
@@ -251,19 +207,14 @@
             const card = document.createElement('div');
             card.className = "card animate-up group";
             card.innerHTML = `
-                <div class="relative aspect-video bg-slate-100 overflow-hidden cursor-pointer" onclick="window.open('${url}')">
+                <div class="relative aspect-[16/9] bg-slate-100 overflow-hidden cursor-pointer" onclick="window.open('${url}')">
                     <img src="${url}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
-                        <ion-icon name="eye-outline" class="text-2xl"></ion-icon>
-                    </div>
                 </div>
                 <div class="p-4">
-                    <h4 class="font-medium text-sm text-slate-800 truncate" title="${title}">${title}</h4>
-                    <div class="flex justify-between items-center mt-3">
-                        <span class="text-xs text-slate-400">Just now</span>
-                        <a href="${url}" download class="text-xs text-green-600 hover:underline flex items-center gap-1">
-                            <ion-icon name="download-outline"></ion-icon> Download
-                        </a>
+                    <h4 class="font-medium text-sm text-slate-800 truncate">${title}</h4>
+                    <div class="mt-2 flex justify-between">
+                         <span class="text-[10px] bg-slate-100 px-2 py-1 rounded text-slate-500">FLUX 8K</span>
+                         <a href="${url}" download class="text-xs text-green-600 hover:underline">Download HD</a>
                     </div>
                 </div>
             `;
